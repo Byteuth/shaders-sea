@@ -70,6 +70,41 @@ const waterMaterial = new THREE.ShaderMaterial({
 		},
 	},
 });
+
+// Store the initial/default values
+const defaultValues = {
+	uTime: 0,
+	uBigWavesElevation: 0.121,
+	uBigWavesFrequency: new THREE.Vector2(5, 2.5),
+	uBigWavesSpeed: 0.6,
+	uSmallWavesElevation: 0.04,
+	uSmallWavesFrequency: 7.5,
+	uSmallWavesSpeed: 1.0,
+	uSmallWavesIterations: 9,
+	uDepthColor: new THREE.Color(debugObject.depthColor),
+	uSurfaceColor: new THREE.Color(debugObject.surfaceColor),
+	uColorOffset: 0.15,
+	uColorMultiplier: 6.5
+};
+
+// Create a reset function
+function resetWaterMaterial() {
+	waterMaterial.uniforms.uTime.value = defaultValues.uTime;
+	waterMaterial.uniforms.uBigWavesElevation.value = defaultValues.uBigWavesElevation;
+	waterMaterial.uniforms.uBigWavesFrequency.value.copy(defaultValues.uBigWavesFrequency);
+	waterMaterial.uniforms.uBigWavesSpeed.value = defaultValues.uBigWavesSpeed;
+	waterMaterial.uniforms.uSmallWavesElevation.value = defaultValues.uSmallWavesElevation;
+	waterMaterial.uniforms.uSmallWavesFrequency.value = defaultValues.uSmallWavesFrequency;
+	waterMaterial.uniforms.uSmallWavesSpeed.value = defaultValues.uSmallWavesSpeed;
+	waterMaterial.uniforms.uSmallWavesIterations.value = defaultValues.uSmallWavesIterations;
+	waterMaterial.uniforms.uDepthColor.value.copy(defaultValues.uDepthColor);
+	waterMaterial.uniforms.uSurfaceColor.value.copy(defaultValues.uSurfaceColor);
+	waterMaterial.uniforms.uColorOffset.value = defaultValues.uColorOffset;
+	waterMaterial.uniforms.uColorMultiplier.value = defaultValues.uColorMultiplier;
+}
+
+// Add reset button to GUI
+gui.add({ reset: resetWaterMaterial }, "reset").name("Reset");
 gui.add(waterMaterial, "wireframe").name("wireframe");
 gui
 	.add(waterMaterial.uniforms.uBigWavesElevation, "value")
