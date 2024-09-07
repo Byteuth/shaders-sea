@@ -12,6 +12,7 @@ const gui = new GUI({ width: 340 });
 const debugObject = {
 	depthColor: "#2274a0",
 	surfaceColor: "#82a7c0",
+	backgroundColor: "#2274a0",
 };
 
 // Canvas
@@ -19,12 +20,53 @@ const canvas = document.querySelector("canvas.webgl");
 
 // Scene
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(debugObject.backgroundColor);
+gui.addColor(scene, "background").onChange(() => {
+	scene.background.value.set(debugObject.backgroundColor);
+});
 
+const textureLoader = new THREE.TextureLoader();
+
+const woodColorTexture = textureLoader.load(
+	"/worn_planks_1k/textures/worn_planks_diff_1k.jpg"
+);
+const woodNormalTexture = textureLoader.load(
+	"/worn_planks_1k/textures/worn_planks_nor_gl_1k.jpg"
+);
+const woodRoughnessAOMetalnessTexture = textureLoader.load(
+	"/worn_planks_1k/textures/worn_planks_arm_1k.jpg"
+);
 /**
  * Water
  */
+
 // Geometry
 const waterGeometry = new THREE.PlaneGeometry(2, 2, 512, 512);
+const borderGeometry = new THREE.BoxGeometry(6.25, 0.2, 0.2);
+const borderMaterial = new THREE.MeshBasicMaterial({
+	map: woodColorTexture,
+	normalMap: woodNormalTexture,
+	roughnessMap: woodRoughnessAOMetalnessTexture,
+	aoMap: woodRoughnessAOMetalnessTexture,
+	aoMapIntensity: 1,
+	// color: 'red',
+});
+const border1 = new THREE.Mesh(borderGeometry, borderMaterial);
+const border2 = new THREE.Mesh(borderGeometry, borderMaterial);
+const border3 = new THREE.Mesh(borderGeometry, borderMaterial);
+const border4 = new THREE.Mesh(borderGeometry, borderMaterial);
+
+border1.position.set(0.125, 0, -3.1);
+border2.position.set(-0.125, 0, 3.1);
+border3.position.set(3.1, 0, 0.125);
+border3.rotation.y = Math.PI / 2;
+border4.position.set(-3.1, 0, -0.125);
+border4.rotation.y = Math.PI / 2;
+
+const borderGroup = new THREE.Group();
+borderGroup.add(border1, border2, border3, border4);
+scene.add(borderGroup);
+borderGroup.position.set(0, -0.1, 0);
 
 // Material
 const waterMaterial = new THREE.ShaderMaterial({
@@ -84,26 +126,32 @@ const defaultValues = {
 	uDepthColor: new THREE.Color(debugObject.depthColor),
 	uSurfaceColor: new THREE.Color(debugObject.surfaceColor),
 	uColorOffset: 0.15,
-	uColorMultiplier: 6.5
+	uColorMultiplier: 6.5,
 };
 
-// Create a reset function
 function resetWaterMaterial() {
 	waterMaterial.uniforms.uTime.value = defaultValues.uTime;
-	waterMaterial.uniforms.uBigWavesElevation.value = defaultValues.uBigWavesElevation;
-	waterMaterial.uniforms.uBigWavesFrequency.value.copy(defaultValues.uBigWavesFrequency);
+	waterMaterial.uniforms.uBigWavesElevation.value =
+		defaultValues.uBigWavesElevation;
+	waterMaterial.uniforms.uBigWavesFrequency.value.copy(
+		defaultValues.uBigWavesFrequency
+	);
 	waterMaterial.uniforms.uBigWavesSpeed.value = defaultValues.uBigWavesSpeed;
-	waterMaterial.uniforms.uSmallWavesElevation.value = defaultValues.uSmallWavesElevation;
-	waterMaterial.uniforms.uSmallWavesFrequency.value = defaultValues.uSmallWavesFrequency;
-	waterMaterial.uniforms.uSmallWavesSpeed.value = defaultValues.uSmallWavesSpeed;
-	waterMaterial.uniforms.uSmallWavesIterations.value = defaultValues.uSmallWavesIterations;
+	waterMaterial.uniforms.uSmallWavesElevation.value =
+		defaultValues.uSmallWavesElevation;
+	waterMaterial.uniforms.uSmallWavesFrequency.value =
+		defaultValues.uSmallWavesFrequency;
+	waterMaterial.uniforms.uSmallWavesSpeed.value =
+		defaultValues.uSmallWavesSpeed;
+	waterMaterial.uniforms.uSmallWavesIterations.value =
+		defaultValues.uSmallWavesIterations;
 	waterMaterial.uniforms.uDepthColor.value.copy(defaultValues.uDepthColor);
 	waterMaterial.uniforms.uSurfaceColor.value.copy(defaultValues.uSurfaceColor);
 	waterMaterial.uniforms.uColorOffset.value = defaultValues.uColorOffset;
-	waterMaterial.uniforms.uColorMultiplier.value = defaultValues.uColorMultiplier;
+	waterMaterial.uniforms.uColorMultiplier.value =
+		defaultValues.uColorMultiplier;
 }
 
-// Add reset button to GUI
 gui.add({ reset: resetWaterMaterial }, "reset").name("Reset");
 gui.add(waterMaterial, "wireframe").name("wireframe");
 gui
@@ -166,7 +214,7 @@ gui
 	.add(waterMaterial.uniforms.uSmallWavesIterations, "value")
 	.min(0)
 	.max(10)
-	.step(0.001)
+	.step(1)
 	.name("uSmallWavesIterations");
 
 gui.addColor(debugObject, "depthColor").onChange(() => {
@@ -179,6 +227,7 @@ console.log(waterVertexShader);
 // Mesh
 const water = new THREE.Mesh(waterGeometry, waterMaterial);
 water.rotation.x = -Math.PI * 0.5;
+water.scale.set(3, 3, 3);
 scene.add(water);
 
 /**
